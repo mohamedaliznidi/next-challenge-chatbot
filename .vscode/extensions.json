@@ -1,0 +1,76 @@
+{
+  "recommendations": [
+    // Essential for React/Next.js development
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+    
+    // React and JSX support
+    "ms-vscode.vscode-json",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    
+    // Git integration
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+    
+    // Code quality and productivity
+    "streetsidesoftware.code-spell-checker",
+    "usernamehw.errorlens",
+    "gruntfuggly.todo-tree",
+    "aaron-bond.better-comments",
+    
+    // File management
+    "christian-kohler.npm-intellisense",
+    "ms-vscode.vscode-npm-script",
+    "bradlc.vscode-tailwindcss",
+    
+    // Markdown support
+    "yzhang.markdown-all-in-one",
+    "davidanson.vscode-markdownlint",
+    
+    // Theme and icons
+    "pkief.material-icon-theme",
+    "github.github-vscode-theme",
+    
+    // AI and productivity
+    "github.copilot",
+    "github.copilot-chat",
+    
+    // Testing
+    "orta.vscode-jest",
+    
+    // Environment files
+    "mikestead.dotenv",
+    
+    // REST API testing
+    "humao.rest-client",
+    
+    // Docker (if needed)
+    "ms-azuretools.vscode-docker",
+    
+    // YAML support
+    "redhat.vscode-yaml",
+    
+    // Import cost analysis
+    "wix.vscode-import-cost",
+    
+    // Bracket pair colorization
+    "coenraads.bracket-pair-colorizer-2",
+    
+    // Auto close tag
+    "formulahendry.auto-close-tag",
+    
+    // Indent rainbow
+    "oderwat.indent-rainbow",
+    
+    // Color highlight
+    "naumovs.color-highlight"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.vscode-typescript",
+    "hookyqr.beautify",
+    "ms-vscode.vscode-json"
+  ]
+}
