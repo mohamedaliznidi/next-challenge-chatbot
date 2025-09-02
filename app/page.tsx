@@ -99,6 +99,7 @@ const ChatBotDemo = () => {
         },
       },
     );
+    setInput('');
   };
 
   const handleNewChat = () => {
@@ -192,13 +193,9 @@ const ChatBotDemo = () => {
                                   errorText={part.errorText}
                                   toolCallId={part.toolCallId}
                                 />
-                                {part.state === 'output-available' && policyOutput?.policies && (
-                                  <div className="space-y-2">
-                                    {policyOutput.policies.map((policy: any, idx: number) => (
-                                      <InsurancePolicyDisplay key={idx} policy={policy} />
-                                    ))}
-                                  </div>
-                                )}
+                                {part.state === 'output-available' && policyOutput ? (
+                                  <InsurancePolicyDisplay policy={policyOutput} />
+                                ) : null}
                               </div>
                             );
                           }
@@ -237,6 +234,7 @@ const ChatBotDemo = () => {
 
                           case 'tool-getClaimStatus': {
                             const claimOutput = part.output as any;
+                            console.log("🚀 ~ claimOutput:", claimOutput)
                             return (
                               <div key={`${message.id}-${i}`} className="space-y-4">
                                 <Tool
@@ -297,7 +295,7 @@ const ChatBotDemo = () => {
                 onClick={() => setWebSearch(!webSearch)}
               >
                 <GlobeIcon size={16} />
-                <span>Search</span>
+                <span>Recherche</span>
               </PromptInputButton>
               <PromptInputModelSelect
                 onValueChange={(value) => {

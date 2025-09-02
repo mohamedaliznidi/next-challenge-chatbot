@@ -3,13 +3,13 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { 
-  ShieldCheckIcon, 
-  FileTextIcon, 
-  CreditCardIcon, 
+import {
+  CalculatorIcon,
   ClipboardListIcon,
+  CreditCardIcon,
+  FileTextIcon,
   HelpCircleIcon,
-  CalculatorIcon 
+  ShieldCheckIcon
 } from 'lucide-react';
 
 export type ChatSuggestion = {
@@ -94,35 +94,35 @@ export const ChatSuggestions = ({
   return (
     <div className={cn('w-full max-w-4xl mx-auto p-4', className)}>
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <h3 className="text-lg font-semibold text-foreground mb-2">
           Comment puis-je vous aider aujourd'hui ?
         </h3>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Choisissez une suggestion ou posez votre question directement
         </p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {displaySuggestions.map((suggestion) => (
-          <Card 
+          <Card
             key={suggestion.id}
-            className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-gray-200"
+            className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02] border-border hover:border-border"
           >
             <CardContent className="p-4">
               <Button
                 variant="ghost"
-                className="w-full h-auto p-0 justify-start text-left"
+                className="w-full h-auto p-0 justify-start text-left hover:bg-transparent"
                 onClick={() => onSuggestionClick(suggestion.prompt)}
               >
                 <div className="flex items-start gap-3 w-full">
-                  <div className="flex-shrink-0 p-2 bg-blue-50 rounded-lg text-blue-600">
+                  <div className="flex-shrink-0 p-2 bg-secondary/10 rounded-lg text-secondary">
                     {suggestion.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-gray-900 text-sm mb-1">
+                    <h4 className="font-medium text-foreground text-sm mb-1">
                       {suggestion.title}
                     </h4>
-                    <p className="text-xs text-gray-600 line-clamp-2">
+                    <p className="text-xs text-muted-foreground line-clamp-2">
                       {suggestion.description}
                     </p>
                   </div>
@@ -144,16 +144,16 @@ export type WelcomeMessageProps = {
 export const WelcomeMessage = ({ onSuggestionClick, className }: WelcomeMessageProps) => (
   <div className={cn('text-center py-8', className)}>
     <div className="mb-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">
+      <h1 className="text-2xl font-bold text-secondary mb-2">
         Bienvenue chez BH Assurance
       </h1>
-      <p className="text-gray-600 max-w-2xl mx-auto">
-        Je suis votre assistant virtuel spécialisé en assurance. 
+      <p className="text-muted-foreground max-w-2xl mx-auto">
+        Je suis votre assistant virtuel spécialisé en assurance.
         Je peux vous aider avec vos polices, sinistres, paiements et devis.
       </p>
     </div>
-    
-    <ChatSuggestions 
+
+    <ChatSuggestions
       onSuggestionClick={onSuggestionClick}
       maxSuggestions={6}
     />

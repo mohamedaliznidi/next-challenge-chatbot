@@ -1,97 +1,145 @@
 import { z } from 'zod';
 
-// Note: Install zod if not already installed: yarn add zod
 
-// Input schemas for insurance tools
+// Input schemas for insurance tools - Updated to match Prisma schema
 export const getInsuranceProductInfoSchema = z.object({
-  productType: z.enum(['auto', 'home', 'life', 'health', 'business']).optional(),
-  branch: z.string().optional(),
-  subBranch: z.string().optional(),
-  planType: z.enum(['standard', 'premium', 'basic']).optional(),
-  query: z.string().describe('Specific question about the insurance product'),
+  codeBranche: z.number().optional().describe('Code de la branche d\'assurance'),
+  codeSousBranche: z.number().optional().describe('Code de la sous-branche'),
+  codeProduit: z.number().optional().describe('Code du produit'),
+  codeGarantie: z.number().optional().describe('Code de la garantie'),
+  libBranche: z.string().optional().describe('Libellé de la branche'),
+  libSousBranche: z.string().optional().describe('Libellé de la sous-branche'),
+  libProduit: z.string().optional().describe('Libellé du produit'),
+  query: z.string().describe('Question spécifique sur le produit d\'assurance'),
 });
 
 export const getClientPolicyInfoSchema = z.object({
-  clientId: z.string().describe('Unique client identifier'),
-  policyNumber: z.string().optional().describe('Specific policy number to lookup'),
-  policyType: z.enum(['auto', 'home', 'life', 'health', 'business']).optional(),
+  refPersonne: z.number().optional().describe('Référence de la personne (physique ou morale)'),
+  numContrat: z.string().optional().describe('Numéro de contrat spécifique'),
+  raisonSociale: z.string().optional().describe('Raison sociale (pour personne morale)'),
+  nomPrenom: z.string().optional().describe('Nom et prénom (pour personne physique)'),
+  matriculeFiscale: z.string().optional().describe('Matricule fiscal (pour personne morale)'),
+  numPieceIdentite: z.number().optional().describe('Numéro de pièce d\'identité (pour personne physique)'),
 });
 
 export const checkClaimCoverageSchema = z.object({
-  clientId: z.string().describe('Unique client identifier'),
-  policyNumber: z.string().describe('Policy number for coverage check'),
-  incidentType: z.string().describe('Type of incident or claim'),
-  incidentDetails: z.string().describe('Detailed description of the incident'),
-  claimAmount: z.number().optional().describe('Estimated claim amount'),
+  numContrat: z.string().describe('Numéro de contrat pour vérification de couverture'),
+  natureSinistre: z.string().describe('Nature du sinistre'),
+  libTypeSinistre: z.string().optional().describe('Type de sinistre'),
+  observationSinistre: z.string().optional().describe('Description détaillée du sinistre'),
+  montantEncaisse: z.number().optional().describe('Montant estimé du sinistre'),
+  lieuAccident: z.string().optional().describe('Lieu de l\'accident'),
 });
 
 export const getPaymentStatusSchema = z.object({
-  clientId: z.string().describe('Unique client identifier'),
-  policyNumber: z.string().optional().describe('Specific policy number'),
-  period: z.enum(['current', 'last_3_months', 'last_year']).optional().default('current'),
+  refPersonne: z.number().optional().describe('Référence de la personne'),
+  numContrat: z.string().optional().describe('Numéro de contrat spécifique'),
+  raisonSociale: z.string().optional().describe('Raison sociale (pour personne morale)'),
+  nomPrenom: z.string().optional().describe('Nom et prénom (pour personne physique)'),
 });
 
 export const getClaimStatusSchema = z.object({
-  clientId: z.string().describe('Unique client identifier'),
-  claimNumber: z.string().optional().describe('Specific claim number'),
-  status: z.enum(['submitted', 'processing', 'approved', 'denied', 'paid']).optional(),
+  numSinistre: z.string().optional().describe('Numéro de sinistre spécifique'),
+  numContrat: z.string().optional().describe('Numéro de contrat'),
+  refPersonne: z.number().optional().describe('Référence de la personne'),
+  libEtatSinistre: z.string().optional().describe('État du sinistre'),
 });
 
 export const generateQuoteSchema = z.object({
   clientInfo: z.object({
-    age: z.number().min(18).max(100),
-    location: z.string().describe('Client location (city, state)'),
-    riskProfile: z.object({
-      drivingRecord: z.string().optional(),
-      creditScore: z.number().optional(),
-      previousClaims: z.number().optional(),
-    }).optional(),
+    // For PersonnePhysique
+    nomPrenom: z.string().optional().describe('Nom et prénom du client'),
+    dateNaissance: z.string().optional().describe('Date de naissance (YYYY-MM-DD)'),
+    lieuNaissance: z.string().optional().describe('Lieu de naissance'),
+    codeSexe: z.string().optional().describe('Code sexe (M/F)'),
+    situationFamiliale: z.string().optional().describe('Situation familiale'),
+    numPieceIdentite: z.number().optional().describe('Numéro de pièce d\'identité (CIN)'),
+    libSecteurActivite: z.string().optional().describe('Secteur d\'activité'),
+    libProfession: z.string().optional().describe('Profession'),
+    ville: z.string().optional().describe('Ville'),
+    libGouvernorat: z.string().optional().describe('Gouvernorat'),
+    // For PersonneMorale
+    raisonSociale: z.string().optional().describe('Raison sociale de l\'entreprise'),
+    matriculeFiscale: z.string().optional().describe('Matricule fiscal'),
   }),
-  productType: z.enum(['auto', 'home', 'life', 'health', 'business']),
-  coverageOptions: z.object({
-    coverageAmount: z.number().positive(),
-    deductible: z.number().positive().optional(),
-    additionalCoverage: z.array(z.string()).optional(),
+  productInfo: z.object({
+    libProduit: z.string().describe('Libellé du produit d\'assurance'),
+    branche: z.string().optional().describe('Branche d\'assurance'),
+    capitalAssure: z.number().positive().optional().describe('Capital assuré souhaité (valeur vénale du véhicule)'),
   }),
-  additionalInfo: z.record(z.any()).optional(),
+  additionalInfo: z.object({
+    // Vehicle specific information for auto insurance API
+    natureContrat: z.string().optional().describe('Nature du contrat (r pour renouvellement, n pour nouveau)'),
+    nombrePlace: z.number().optional().describe('Nombre de places du véhicule'),
+    datePremiereMiseEnCirculation: z.string().optional().describe('Date de première mise en circulation (YYYY-MM-DD)'),
+    capitalBrisDeGlace: z.number().optional().describe('Capital bris de glace'),
+    capitalDommageCollision: z.number().optional().describe('Capital dommage collision'),
+    puissance: z.number().optional().describe('Puissance du véhicule'),
+    classe: z.number().optional().describe('Classe du véhicule'),
+  }).optional(),
 });
 
-// Output type definitions
+// Output type definitions - Updated to match Prisma schema
 export type InsuranceProductInfo = {
-  productType: string;
-  branch: string;
-  subBranch?: string;
-  planType: string;
-  guarantees: string[];
-  coverage: {
+  codeBranche?: number;
+  codeSousBranche?: number;
+  codeProduit?: number;
+  codeGarantie?: number;
+  libBranche: string;
+  libSousBranche?: string;
+  libProduit: string;
+  libGarantie?: string;
+  description: string;
+  garanties: Array<{
+    codeGarantie: number;
+    libGarantie: string;
     description: string;
-    limits: Record<string, number>;
-    exclusions: string[];
-  };
-  conditions: {
-    eligibility: string[];
-    requirements: string[];
-    terms: string;
-  };
-  pricing: {
-    basePremium: number;
-    factors: Record<string, number>;
-  };
+  }>;
+  profilsCibles?: string[];
 };
 
 export type ClientPolicyInfo = {
-  clientId: string;
-  policies: Array<{
-    policyNumber: string;
-    type: string;
-    status: 'active' | 'expired' | 'cancelled' | 'pending';
-    holder: string;
-    premium: number;
-    coverage: number;
-    deductible?: number;
-    startDate: string;
-    endDate: string;
-    guarantees: string[];
+  refPersonne?: number;
+  personnePhysique?: {
+    refPersonne: number;
+    nomPrenom: string;
+    dateNaissance?: Date;
+    lieuNaissance?: string;
+    codeSexe?: string;
+    situationFamiliale?: string;
+    numPieceIdentite: number;
+    libSecteurActivite?: string;
+    libProfession?: string;
+    ville?: string;
+    libGouvernorat?: string;
+    villeGouvernorat?: string;
+  } | undefined;
+  personneMorale?: {
+    refPersonne: number;
+    raisonSociale: string;
+    matriculeFiscale: string;
+    libSecteurActivite?: string;
+    libActivite?: string;
+    ville?: string;
+    libGouvernorat?: string;
+    villeGouvernorat?: string;
+  } | undefined;
+  contrats: Array<{
+    numContrat: string;
+    libProduit: string;
+    effetContrat: Date;
+    dateExpiration?: Date;
+    prochainTerme?: string;
+    libEtatContrat?: string;
+    branche?: string;
+    sommeQuittances?: number;
+    statutPaiement?: string;
+    capitalAssure?: number;
+    garanties: Array<{
+      codeGarantie: number;
+      libGarantie?: string;
+      capitalAssure?: number;
+    }>;
   }>;
 };
 
@@ -103,63 +151,72 @@ export type ClaimCoverageResult = {
   estimatedPayout?: number | undefined;
   deductible?: number | undefined;
   exclusions?: string[] | undefined;
+  garantiesApplicables: Array<{
+    codeGarantie: number;
+    libGarantie?: string;
+    capitalAssure?: number;
+  }>;
 };
 
 export type PaymentStatusResult = {
-  clientId: string;
-  policyNumber?: string;
-  status: 'current' | 'overdue' | 'pending';
-  lastPayment: {
-    date: string;
-    amount: number;
-    method: string;
-  };
-  nextDue: {
-    date: string;
-    amount: number;
-  };
-  outstandingBalance: number;
-  paymentHistory: Array<{
-    date: string;
-    amount: number;
-    status: string;
+  refPersonne?: number;
+  numContrat?: string;
+  statutPaiement?: string;
+  sommeQuittances?: number;
+  prochainTerme?: string;
+  contrats: Array<{
+    numContrat: string;
+    libProduit: string;
+    statutPaiement?: string;
+    sommeQuittances?: number;
+    prochainTerme?: string;
+    effetContrat: Date;
+    dateExpiration?: Date;
   }>;
 };
 
 export type ClaimStatusResult = {
-  claimNumber: string;
-  clientId: string;
-  policyNumber: string;
-  type: string;
-  status: 'submitted' | 'processing' | 'approved' | 'denied' | 'paid';
-  description: string;
-  amount: number;
-  submittedDate: string;
-  processedDate?: string | undefined;
-  estimatedResolution?: string;
-  requiredDocuments?: string[];
-  nextSteps?: string[];
+  numSinistre: string;
+  numContrat: string;
+  libBranche: string;
+  libSousBranche: string;
+  libProduit: string;
+  natureSinistre: string;
+  libTypeSinistre?: string;
+  tauxResponsabilite?: number;
+  dateSurvenance?: Date;
+  dateDeclaration?: Date;
+  dateOuverture?: Date;
+  observationSinistre?: string;
+  libEtatSinistre?: string;
+  lieuAccident?: string;
+  motifReouverture?: string;
+  montantEncaisse?: number;
+  montantAEncaisser?: number;
 };
 
 export type QuoteResult = {
   quoteId: string;
-  productType: string;
-  premium: {
-    monthly: number;
-    annual: number;
-    semiAnnual: number;
+  libProduit: string;
+  branche?: string;
+  capitalAssure?: number;
+  prime: {
+    mensuelle: number;
+    annuelle: number;
+    semestrielle: number;
   };
-  coverage: {
-    limits: Record<string, number>;
-    deductible: number;
-    additionalCoverage: string[];
-  };
-  discounts: Array<{
-    name: string;
-    amount: number;
-    percentage: number;
+  garanties: Array<{
+    codeGarantie: number;
+    libGarantie: string;
+    capitalAssure?: number;
+    description: string;
   }>;
-  validUntil: string;
-  terms: string;
-  nextSteps: string[];
+  remises: Array<{
+    nom: string;
+    montant: number;
+    pourcentage: number;
+  }>;
+  validJusquau: string;
+  conditions: string;
+  prochainEtapes: string[];
 };

@@ -1,5 +1,5 @@
 // Global type definitions for the insurance chat application
-
+import React from 'react';
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';

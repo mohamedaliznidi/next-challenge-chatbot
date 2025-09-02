@@ -47,6 +47,6 @@ export const NewChatButton = ({
     title="Start a new conversation"
   >
     <MessageSquarePlusIcon className="h-4 w-4" />
-    <span>New Chat</span>
+    <span>Nouvelle discussion</span>
   </Button>
 );

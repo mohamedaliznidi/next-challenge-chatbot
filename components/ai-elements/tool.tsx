@@ -17,7 +17,6 @@ import {
   XCircleIcon,
 } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
-import { CodeBlock } from './code-block';
 
 export type ToolProps = ComponentProps<typeof Collapsible>;
 
@@ -36,10 +35,10 @@ export type ToolHeaderProps = {
 
 const getStatusBadge = (status: ToolUIPart['state']) => {
   const labels = {
-    'input-streaming': 'Pending',
-    'input-available': 'Running',
-    'output-available': 'Completed',
-    'output-error': 'Error',
+    'input-streaming': 'En attente',
+    'input-available': 'En cours',
+    'output-available': 'Terminé',
+    'output-error': 'Erreur',
   } as const;
 
   const icons = {
@@ -72,7 +71,7 @@ export const ToolHeader = ({
   >
     <div className="flex items-center gap-2">
       <WrenchIcon className="size-4 text-muted-foreground" />
-      <span className="font-medium text-sm">{type}</span>
+      <span className="font-medium text-sm">Traitement en cours</span>
       {getStatusBadge(state)}
     </div>
     <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
@@ -97,11 +96,10 @@ export type ToolInputProps = ComponentProps<'div'> & {
 
 export const ToolInput = ({ className, input, ...props }: ToolInputProps) => (
   <div className={cn('space-y-2 overflow-hidden p-4', className)} {...props}>
-    <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-      Parameters
-    </h4>
-    <div className="rounded-md bg-muted/50">
-      <CodeBlock code={JSON.stringify(input, null, 2)} language="json" />
+    <div className="rounded-md bg-muted/50 p-3">
+      <p className="text-sm text-muted-foreground">
+        Analyse de votre demande en cours...
+      </p>
     </div>
   </div>
 );
@@ -123,19 +121,17 @@ export const ToolOutput = ({
 
   return (
     <div className={cn('space-y-2 p-4', className)} {...props}>
-      <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {errorText ? 'Error' : 'Result'}
-      </h4>
       <div
         className={cn(
-          'overflow-x-auto rounded-md text-xs [&_table]:w-full',
+          'rounded-md p-3',
           errorText
             ? 'bg-destructive/10 text-destructive'
-            : 'bg-muted/50 text-foreground'
+            : 'bg-green-50 text-green-700'
         )}
       >
-        {errorText && <div>{errorText}</div>}
-        {output && <div>{output}</div>}
+        <p className="text-sm">
+          {errorText ? 'Une erreur s\'est produite lors du traitement.' : 'Traitement terminé avec succès.'}
+        </p>
       </div>
     </div>
   );
