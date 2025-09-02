@@ -1,0 +1,113 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Contrat {
+  num_contrat           String            @id
+  ref_personne          Int?
+  lib_produit           String
+  effet_contrat         DateTime
+  date_expiration       DateTime?
+  prochain_terme        String?
+  lib_etat_contrat      String?
+  branche               String?
+  somme_quittances      Float?
+  statut_paiement       String?
+  capital_assure        Float?
+
+  ref_personne_morale   Int?
+  ref_personne_physique Int?
+  PersonneMorale        PersonneMorale?   @relation(fields: [ref_personne_morale], references: [ref_personne], map: "contrat_personne_morale_fkey")
+  PersonnePhysique      PersonnePhysique? @relation(fields: [ref_personne_physique], references: [ref_personne], map: "contrat_personne_physique_fkey")
+}
+
+model DescriptionGarenties {
+  id                Int      @id @default(autoincrement())
+  code_branche      Int
+  code_sous_branche Int
+  code_produit      Int
+  code_garantie     Int
+  lib_branche       String
+  lib_sous_branche  String
+  lib_produit       String
+  lib_garantie      String
+  description       String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime
+}
+
+model GarantieContrat {
+  num_contrat    String
+  code_garantie  Int
+  capital_assure Int?
+  lib_garantie   String?
+  id             Int     @id @default(autoincrement())
+
+  @@index([num_contrat], map: "idx_num_contrat")
+}
+
+model MapProduitProfil {
+  id               Int      @id @default(autoincrement())
+  lib_branche      String
+  lib_sous_branche String
+  lib_produit      String
+  profils_cibles   String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime
+}
+
+model PersonneMorale {
+  ref_personne         Int       @id
+  raison_sociale       String    @unique
+  matricule_fiscale    String    @unique
+  lib_secteur_activite String?
+  lib_activite         String?
+  ville                String?
+  lib_gouvernorat      String?
+  ville_gouvernorat    String?
+  Contrat              Contrat[]
+}
+
+model PersonnePhysique {
+  ref_personne         Int       @id
+  nom_prenom           String    @unique
+  date_naissance       DateTime?
+  lieu_naissance       String?
+  code_sexe            String?
+  situation_familiale  String?
+  num_piece_identite   Int       @unique
+  lib_secteur_activite String?
+  lib_profession       String?
+  ville                String?
+  lib_gouvernorat      String?
+  ville_gouvernorat    String?
+  Contrat              Contrat[]
+}
+
+model Sinistre {
+  num_sinistre         String    @id
+  num_contrat          String
+  lib_branche          String
+  lib_sous_branche     String
+  lib_produit          String
+  nature_sinistre      String
+  lib_type_sinistre    String?
+  taux_responsabilite  Int?
+  date_survenance      DateTime?
+  date_declaration     DateTime?
+  date_ouverture       DateTime?
+  observation_sinistre String?
+  lib_etat_sinistre    String?
+  lieu_accident        String?
+  motif_reouverture    String?
+  montant_encaisse     Int?
+  montant_a_encaisser  Float?
+
+  @@index([num_contrat], map: "idx_num_contrat_sinistre")
+}
