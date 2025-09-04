@@ -17,7 +17,7 @@
     "test:coverage": "jest --coverage",
     "analyze": "cross-env ANALYZE=true next build",
     "clean": "rimraf .next out dist",
-    "postinstall": "next telemetry disable",
+    "postinstall": "prisma generate && next telemetry disable",
     "check-all": "yarn typecheck && yarn lint:check && yarn format:check"
   },
   "dependencies": {

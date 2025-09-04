@@ -207,5 +207,6 @@
   "editor.minimap.maxColumn": 120,
 
   // Security
-  "security.workspace.trust.untrustedFiles": "open"
+  "security.workspace.trust.untrustedFiles": "open",
+  "WillLuke.nextjs.hasPrompted": true
 }
