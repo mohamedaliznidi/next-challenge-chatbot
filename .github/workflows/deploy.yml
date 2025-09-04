@@ -1,0 +1,240 @@
+# Deployment Workflow
+# Deploys the application to production on successful merge to main
+
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # Allow manual deployment
+
+env:
+  NODE_VERSION: '18'
+  PNPM_VERSION: '8'
+
+jobs:
+  # Pre-deployment checks
+  pre-deploy:
+    name: Pre-deployment Checks
+    runs-on: ubuntu-latest
+    
+    outputs:
+      should-deploy: ${{ steps.check.outputs.should-deploy }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if deployment should proceed
+        id: check
+        run: |
+          # Check if this is a merge commit or manual trigger
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]] || [[ $(git rev-list --count HEAD^..HEAD) -eq 1 ]]; then
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "should-deploy=false" >> $GITHUB_OUTPUT
+          fi
+
+  # Build and test before deployment
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    needs: pre-deploy
+    if: needs.pre-deploy.outputs.should-deploy == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
+      - name: Run linting
+        run: pnpm lint
+
+      - name: Run type checking
+        run: pnpm typecheck
+
+      - name: Build application
+        run: pnpm build
+        env:
+          SKIP_ENV_VALIDATION: true
+
+      - name: Run tests
+        run: pnpm test
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+
+  # Deploy to Vercel
+  deploy-vercel:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: [pre-deploy, build-and-test]
+    if: needs.pre-deploy.outputs.should-deploy == 'true'
+    
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install Vercel CLI
+        run: pnpm add -g vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> $GITHUB_OUTPUT
+
+      - name: Comment deployment URL on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🚀 Deployed to: ${{ steps.deploy.outputs.url }}'
+            })
+
+  # Post-deployment checks
+  post-deploy:
+    name: Post-deployment Checks
+    runs-on: ubuntu-latest
+    needs: deploy-vercel
+    if: always() && needs.deploy-vercel.result == 'success'
+    
+    steps:
+      - name: Health Check
+        run: |
+          # Wait for deployment to be ready
+          sleep 30
+          
+          # Check if the application is responding
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://mohamedaliznidi-next-challenge.vercel.app/api/health)
+          
+          if [ $response -eq 200 ]; then
+            echo "✅ Health check passed"
+          else
+            echo "❌ Health check failed with status: $response"
+            exit 1
+          fi
+
+      - name: Performance Check
+        run: |
+          # Basic performance check using curl
+          response_time=$(curl -s -o /dev/null -w "%{time_total}" https://mohamedaliznidi-next-challenge.vercel.app)
+          
+          # Check if response time is under 3 seconds
+          if (( $(echo "$response_time < 3.0" | bc -l) )); then
+            echo "✅ Performance check passed: ${response_time}s"
+          else
+            echo "⚠️ Performance check warning: ${response_time}s (>3s)"
+          fi
+
+  # Notify deployment status
+  notify:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [deploy-vercel, post-deploy]
+    if: always()
+    
+    steps:
+      - name: Notify Success
+        if: needs.deploy-vercel.result == 'success' && needs.post-deploy.result == 'success'
+        run: |
+          echo "🎉 Deployment successful!"
+          echo "URL: https://mohamedaliznidi-next-challenge.vercel.app"
+
+      - name: Notify Failure
+        if: needs.deploy-vercel.result == 'failure' || needs.post-deploy.result == 'failure'
+        run: |
+          echo "❌ Deployment failed!"
+          exit 1
+
+  # Create GitHub release on successful deployment
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [deploy-vercel, post-deploy]
+    if: needs.deploy-vercel.result == 'success' && needs.post-deploy.result == 'success'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        id: release-notes
+        run: |
+          # Get the latest tag
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          
+          # Generate release notes
+          echo "## Changes since $latest_tag" > release_notes.md
+          git log $latest_tag..HEAD --pretty=format:"- %s (%h)" >> release_notes.md
+          
+          # Set output
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body: ${{ steps.release-notes.outputs.notes }}
+          draft: false
+          prerelease: false
