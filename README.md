@@ -21,12 +21,12 @@ A modern AI-powered insurance chat application built with Next.js 15, React 19, 
 - **UI Components**: Radix UI
 - **AI Integration**: AI SDK with OpenAI and Deepseek
 - **Code Quality**: ESLint 9, Prettier
-- **Package Manager**: pnpm
+- **Package Manager**: Yarn
 
 ## 📋 Prerequisites
 
 - Node.js 18.17 or later
-- pnpm package manager
+- Yarn package manager
 - Git
 
 ## 🚀 Getting Started
@@ -39,7 +39,7 @@ A modern AI-powered insurance chat application built with Next.js 15, React 19, 
 
 2. **Install dependencies**
    ```bash
-   pnpm install
+   yarn install
    ```
 
 3. **Set up environment variables**
@@ -55,7 +55,7 @@ A modern AI-powered insurance chat application built with Next.js 15, React 19, 
 
 4. **Run the development server**
    ```bash
-   pnpm dev
+   yarn dev
    ```
 
 5. **Open your browser**
