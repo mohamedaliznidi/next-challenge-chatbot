@@ -54,13 +54,13 @@ claims processing.
 - **UI Components**: Radix UI
 - **AI Integration**: AI SDK with OpenAI and Deepseek
 - **Code Quality**: ESLint 9, Prettier
-- **Package Manager**: pnpm
+- **Package Manager**: Yarn
 - **Database**: Prisma ORM with PostgreSQL
 
 ## 📋 Prerequisites
 
 - Node.js 18.17 or later
-- pnpm package manager
+- Yarn package manager
 - Git
 - PostgreSQL database (for production)
 
@@ -76,7 +76,7 @@ claims processing.
 2. **Install dependencies**
 
    ```bash
-   pnpm install
+   yarn install
    ```
 
 3. **Set up environment variables**
@@ -96,14 +96,14 @@ claims processing.
 4. **Set up the database**
 
    ```bash
-   pnpm prisma generate
-   pnpm prisma db push
+   yarn prisma generate
+   yarn prisma db push
    ```
 
 5. **Run the development server**
 
    ```bash
-   pnpm dev
+   yarn dev
    ```
 
 6. **Open your browser** Navigate to [http://localhost:3000](http://localhost:3000)
@@ -223,15 +223,15 @@ AI Assistant: Here are your policy details:
 
 ## 📝 Available Scripts
 
-- `pnpm dev` - Start development server
-- `pnpm build` - Build for production
-- `pnpm start` - Start production server
-- `pnpm lint` - Run ESLint
-- `pnpm typecheck` - Run TypeScript type checking
-- `pnpm format` - Format code with Prettier
-- `pnpm test` - Run tests
-- `pnpm clean` - Clean build artifacts
-- `pnpm preview` - Preview production build
+- `yarn dev` - Start development server
+- `yarn build` - Build for production
+- `yarn start` - Start production server
+- `yarn lint` - Run ESLint
+- `yarn typecheck` - Run TypeScript type checking
+- `yarn format` - Format code with Prettier
+- `yarn test` - Run tests
+- `yarn clean` - Clean build artifacts
+- `yarn preview` - Preview production build
 
 ## 🏗️ Project Structure
 
@@ -363,7 +363,7 @@ Testing setup includes:
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
 3. Make your changes
-4. Run checks: `pnpm lint && pnpm typecheck`
+4. Run checks: `yarn lint && yarn typecheck`
 5. Commit your changes: `git commit -m 'Add amazing feature'`
 6. Push to the branch: `git push origin feature/amazing-feature`
 7. Open a Pull Request

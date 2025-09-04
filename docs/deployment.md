@@ -55,8 +55,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-COPY package.json pnpm-lock.yaml* ./
-RUN corepack enable pnpm && pnpm i --frozen-lockfile
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -68,7 +68,7 @@ COPY . .
 RUN npx prisma generate
 
 # Build the application
-RUN corepack enable pnpm && pnpm build
+RUN yarn build
 
 # Production image, copy all the files and run next
 FROM base AS runner
@@ -195,10 +195,10 @@ docker-compose down
    ```bash
    # Build image
    docker build -t insurance-chat .
-   
+
    # Tag for ECR
    docker tag insurance-chat:latest 123456789.dkr.ecr.region.amazonaws.com/insurance-chat:latest
-   
+
    # Push to ECR
    docker push 123456789.dkr.ecr.region.amazonaws.com/insurance-chat:latest
    ```
@@ -216,7 +216,7 @@ docker-compose down
    # Enable required APIs
    gcloud services enable run.googleapis.com
    gcloud services enable cloudbuild.googleapis.com
-   
+
    # Deploy to Cloud Run
    gcloud run deploy insurance-chat \
      --source . \
@@ -384,26 +384,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          
+
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
-          
+
       - name: Install dependencies
         run: pnpm install
-        
+
       - name: Run tests
         run: pnpm test
-        
+
       - name: Build application
         run: pnpm build
-        
+
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v20
         with:
@@ -453,7 +453,7 @@ const nextConfig = {
   output: 'standalone',
   compress: true,
   poweredByHeader: false,
-  
+
   webpack: (config) => {
     config.optimization.splitChunks = {
       chunks: 'all',

@@ -10,8 +10,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-COPY package.json pnpm-lock.yaml* ./
-RUN corepack enable pnpm && pnpm i --frozen-lockfile
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -28,7 +28,7 @@ RUN npx prisma generate
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Build the application
-RUN corepack enable pnpm && pnpm build
+RUN yarn build
 
 # Production image, copy all the files and run next
 FROM base AS runner
